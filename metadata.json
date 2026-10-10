@@ -1,0 +1,6 @@
+{
+  "name": "PulseVibe - Employee Sentiment & Gamified Feedback",
+  "description": "Gamified employee surveys with anonymous weekly sentiment check-ins, real-time analytics, push notification reminders, and leadership PDF reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

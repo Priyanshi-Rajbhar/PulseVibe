@@ -1,0 +1,151 @@
+{
+  "entities": {
+    "Survey": {
+      "title": "Survey",
+      "description": "Employee pulse survey questionnaire created by leadership or managers",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique survey identifier"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the pulse survey",
+          "maxLength": 150
+        },
+        "description": {
+          "type": "string",
+          "description": "Purpose and briefing of the survey",
+          "maxLength": 500
+        },
+        "category": {
+          "type": "string",
+          "description": "Category such as weekly_pulse, culture, burnout, or retro",
+          "enum": ["weekly_pulse", "culture", "burnout", "retro", "general"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Active status of the survey",
+          "enum": ["active", "closed", "scheduled"]
+        },
+        "targetDepartment": {
+          "type": "string",
+          "description": "Department target or all",
+          "maxLength": 60
+        },
+        "weekNumber": {
+          "type": "number",
+          "description": "Calendar week number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation ISO timestamp"
+        }
+      },
+      "required": ["id", "title", "category", "status", "createdAt"]
+    },
+    "Response": {
+      "title": "Response",
+      "description": "Strictly anonymous employee survey submission",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique response identifier"
+        },
+        "surveyId": {
+          "type": "string",
+          "description": "Reference to the survey"
+        },
+        "department": {
+          "type": "string",
+          "description": "Department category for aggregated reporting",
+          "maxLength": 60
+        },
+        "sentimentScore": {
+          "type": "number",
+          "description": "Numeric sentiment rating from 1 to 5"
+        },
+        "enpsScore": {
+          "type": "number",
+          "description": "Employee Net Promoter Score rating 0-10"
+        },
+        "stressLevel": {
+          "type": "number",
+          "description": "Stress rating from 1 (low) to 5 (high)"
+        },
+        "safetyScore": {
+          "type": "number",
+          "description": "Psychological safety score 1 to 5"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Optional anonymous written feedback",
+          "maxLength": 1000
+        },
+        "tags": {
+          "type": "array",
+          "description": "Topic tags attached to the submission"
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when submitted"
+        }
+      },
+      "required": ["id", "surveyId", "sentimentScore", "submittedAt"]
+    },
+    "GamificationProfile": {
+      "title": "GamificationProfile",
+      "description": "Anonymous participant gamification record tracked via hashed device token",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Hashed anonymous participant identifier"
+        },
+        "currentStreak": {
+          "type": "number",
+          "description": "Consecutive weeks responded"
+        },
+        "longestStreak": {
+          "type": "number",
+          "description": "Longest consecutive streak achieved"
+        },
+        "xp": {
+          "type": "number",
+          "description": "Total gamification experience points"
+        },
+        "level": {
+          "type": "number",
+          "description": "Current player tier/level"
+        },
+        "badges": {
+          "type": "array",
+          "description": "List of unlocked badge identifiers"
+        },
+        "lastCheckInWeek": {
+          "type": "number",
+          "description": "Latest week number responded"
+        }
+      },
+      "required": ["id", "currentStreak", "xp", "level"]
+    }
+  },
+  "firestore": {
+    "/surveys/{surveyId}": {
+      "schema": "Survey",
+      "description": "Collection of pulse survey configurations"
+    },
+    "/surveys/{surveyId}/responses/{responseId}": {
+      "schema": "Response",
+      "description": "Subcollection of anonymous submissions under a survey"
+    },
+    "/userProfiles/{profileId}": {
+      "schema": "GamificationProfile",
+      "description": "Anonymous participant streak and gamification achievements"
+    }
+  }
+}

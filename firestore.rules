@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default-deny all unlisted access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Surveys collection: Anyone can read active surveys, managers/admins write
+    match /surveys/{surveyId} {
+      allow get, list: if isValidId(surveyId);
+      allow create, update: if isValidId(surveyId) &&
+        incoming().title is string && incoming().title.size() <= 150 &&
+        incoming().category in ['weekly_pulse', 'culture', 'burnout', 'retro', 'general'] &&
+        incoming().status in ['active', 'closed', 'scheduled'];
+      allow delete: if false;
+
+      // Responses subcollection: anonymous submissions
+      match /responses/{responseId} {
+        allow get, list: if isValidId(surveyId) && isValidId(responseId);
+        allow create: if isValidId(surveyId) && isValidId(responseId) &&
+          incoming().surveyId == surveyId &&
+          incoming().sentimentScore is number &&
+          incoming().sentimentScore >= 1 && incoming().sentimentScore <= 5 &&
+          (incoming().comment == null || (incoming().comment is string && incoming().comment.size() <= 1000));
+        allow update, delete: if false; // Anonymous responses are immutable
+      }
+    }
+
+    // Anonymous Gamification Profile
+    match /userProfiles/{profileId} {
+      allow get, list: if isValidId(profileId);
+      allow create, update: if isValidId(profileId) &&
+        incoming().currentStreak is number &&
+        incoming().xp is number &&
+        incoming().level is number;
+      allow delete: if false;
+    }
+  }
+}
